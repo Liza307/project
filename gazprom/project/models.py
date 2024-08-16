@@ -36,8 +36,12 @@ class Project(models.Model):
     title = models.CharField(max_length=255, verbose_name='Название проекта')
     start_date = models.DateTimeField(verbose_name='Дата начала проекта')
     end_date = models.DateTimeField(verbose_name='Дата окончания проекта')
-    jira_link = models.URLField(max_length=255, verbose_name='Ссылка на проект Jira')
-    confluence_link = models.URLField(max_length=255, verbose_name='Ссы лка на проект в Confluence')
+    jira_link = models.URLField(
+        max_length=255, verbose_name='Ссылка на проект Jira'
+    )
+    confluence_link = models.URLField(
+        max_length=255, verbose_name='Ссы лка на проект в Confluence'
+    )
     git_link = models.URLField(max_length=255, verbose_name='Ссылка на GitLab')
     status = models.CharField(max_length=255)
     priority = models.CharField(max_length=255)
@@ -76,13 +80,13 @@ class Employee(models.Model):
         max_length=254,
         unique=True,
     )
-    phone
-    telegram = 
-    photo
-    status
-    hire_type
+    # phone
+    # telegram =
+    # photo
+    #  status
+    #  hire_type
     personal_information = models.TextField(verbose_name='Описание')
-    skills
+    #  skills
     # vacation_id
     # department_id
     # time_zone_id
@@ -113,8 +117,12 @@ class Time_zones(models.Model):
     name = models.CharField(
         max_length=64, verbose_name='Название часового пояса'
     )
-    abbrev = models.CharField(max_length=5, verbose_name='Аббревиатура часового пояса')
-    utc_offset = models.CharField(max_length=5, verbose_name='Аббревиатура часового пояса')
+    abbrev = models.CharField(
+        max_length=5, verbose_name='Аббревиатура часового пояса'
+    )
+    utc_offset = models.CharField(
+        max_length=5, verbose_name='Аббревиатура часового пояса'
+    )
 
 
 class KPI_values(models.Model):
