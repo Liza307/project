@@ -1,116 +1,156 @@
-from django.contrib.auth import get_user_model
-from project.models import (
-    Departments,
-    Employee,
-    KPI_values,
-    Priority,
-    Project,
-    Time_zones,
-    Vacations,
-)
-
-# from django.core.exceptions import ValidationError
-# from djoser.serializers import UserCreateSerializer, UserSerializer
-# from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
-from rest_framework.relations import PrimaryKeyRelatedField
-
-User = get_user_model()
-
-
-class PrioritySerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Priority
-
-    #    fields = ('id', 'name', 'measurement_unit')
+from project.models import (Employees,
+                            Departments,
+                            Projects,
+                            Participants,
+                            ProjectStatuses,
+                            ProjectPriorities)
 
 
-class ProjectSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Project
-
-    #   fields = ('id', 'name', 'color', 'slug')
-
-
-# class UserReadSerializer(UserSerializer):
-#   is_subscribed = serializers.SerializerMethodField(read_only=True)
-
-#   class Meta:
-#       model = User
-#       fields = (
-#          'email',
-#          'id',
-#           'username',
-#           'first_name',
-#          'last_name',
-#           'is_subscribed',
-#       )
-
-
-class EmployeeSerializer(serializers.ModelSerializer):
+class EmployeeDetailGetSerializer(serializers.ModelSerializer):
+    parentEmployeeId = serializers.SerializerMethodField()
+    firstName = serializers.CharField(source='first_name')
+    lastName = serializers.CharField(source='last_name')
 
     class Meta:
-        # fields = ('id', 'name', 'measurement_unit', 'amount')
-        model = Employee
+        model = Employees
+        fields = (
+            'id',
+            'parentEmployeeId',
+            'firstName',
+            'lastName',
+            'patronymic',
+            'position',
+        )
+
+    def get_parentEmployeeId(self, obj):
+        return str(obj.parent_employee.id) if obj.parent_employee else None
 
 
-class DepartmentsSerializer(serializers.ModelSerializer):
+class ParticipantDetailGetSerializer(serializers.ModelSerializer):
+    projectId = serializers.SerializerMethodField()
+    employeeId = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Participants
+        fields = ['projectId', 'employeeId']
+
+    def get_projectId(self, obj):
+        return str(obj.project.id)
+
+    def get_employeeId(self, obj):
+        return str(obj.employee.id)
+
+
+class ProjectBaseDetailSerializer(serializers.ModelSerializer):
+    parenProjectId = serializers.SerializerMethodField()
+    participants = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Projects
+        fields = [
+            'id',
+            'parenProjectId',
+            'title',
+            'participants',
+        ]
+
+    def get_parenProjectId(self, obj):
+        return str(obj.parent_project.id) if obj.parent_project else None
+
+    def get_participants(self, obj):
+        participants = Participants.objects.filter(project=obj)
+        serializer = ParticipantDetailGetSerializer(participants, many=True)
+        return serializer.data
+
+
+class ProjectStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProjectStatuses
+        fields = ['name']
+
+
+class ProjectPrioritySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProjectPriorities
+        fields = ['name']
+
+
+class ProjectExtendedDetailSerializer(ProjectBaseDetailSerializer):
+    status = serializers.SerializerMethodField()
+    priorities = serializers.SerializerMethodField()
+
+    class Meta(ProjectBaseDetailSerializer.Meta):
+        model = Projects
+        fields = ProjectBaseDetailSerializer.Meta.fields + [
+            'status',
+            'priorities',
+        ]
+
+    def get_status(self, obj):
+        if obj.status:
+            serializer = ProjectStatusSerializer(obj.status)
+            return {'selected': serializer.data['name']}
+        return {'selected': None}
+
+    def get_priorities(self, obj):
+        if obj.priorities:
+            serializer = ProjectPrioritySerializer(obj.priorities)
+            return {'selected': serializer.data['name']}
+        return {'selected': None}
+
+class DepartmentBaseDetailSerializer(serializers.ModelSerializer):
+    parentDepartmentId = serializers.SerializerMethodField()
+    projects = serializers.SerializerMethodField()
+    countEmployee = serializers.CharField(source='count_employee')
+    countProject = serializers.CharField(source='count_project')
 
     class Meta:
         model = Departments
+        fields = [
+            'id',
+            'parentDepartmentId',
+            'title',
+            'countEmployee',
+            'countProject',
+        ]
 
-    #    fields = (
-    #        'id',
-    #    )
-
-
-class VacationsSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Vacations
-
-
-#       fields = (
-#          'tags',
-#       )
-
-#    def validate_cooking_time(self, value):
-#      if value < 1:
-#           raise ValidationError('Время не может быть меньше 1')
-#       return value
+    def get_parentDepartmentId(self, obj):
+        return str(obj.parent_department.id) if obj.parent_department else None
 
 
-class Time_zonesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Time_zones
+class DepartmentProjectsDetailGetSerializer(DepartmentBaseDetailSerializer):
+    projects = serializers.SerializerMethodField()
 
-    #   fields = ('user', 'author')
+    class Meta(DepartmentBaseDetailSerializer.Meta):
+        model = Departments
+        fields = DepartmentBaseDetailSerializer.Meta.fields + [
+            'projects',
+        ]
 
-
-class KPI_valuesSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = KPI_values
-
-    #   fields = (
-    #       'email',
-    #      'username',
-
-
-#     )
+    def get_projects(self, obj):
+        employees = Employees.objects.filter(department=obj)
+        participants = Participants.objects.filter(employee__in=employees)
+        projects = Projects.objects.filter(project_employee__in=participants).distinct()
+        serializer = ProjectExtendedDetailSerializer(projects, many=True)
+        return serializer.data
 
 
-# class ShortRecipeGetSerializer(serializers.ModelSerializer):
-#    """Краткое отображение рецепта"""
+class DepartmentEmployeeDetailGetSerializer(DepartmentBaseDetailSerializer):
+    employees = serializers.SerializerMethodField()
 
-#   image = Base64ImageField(required=True, allow_null=False)
+    class Meta(DepartmentBaseDetailSerializer.Meta):
+        model = Departments
+        fields = DepartmentBaseDetailSerializer.Meta.fields + [
+            'employees',
+        ]
 
-# class Meta:
-#       model = Recipe
-#       fields = (
-#          'id',
-#         'name',
-#          'image',
-#          'cooking_time',
-#      )
+    def get_employees(self, obj):
+        employees = Employees.objects.filter(department=obj)
+        serializer = EmployeeDetailGetSerializer(employees, many=True)
+        return serializer.data
+
+
+class StructureGetSerializer(serializers.Serializer):
+    departments = DepartmentProjectsDetailGetSerializer(many=True, read_only=True)
+    employees = EmployeeDetailGetSerializer(many=True, read_only=True)
