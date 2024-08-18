@@ -10,7 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+
 from environs import Env
 
 env = Env()
@@ -26,7 +28,6 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', '127.0.0.1,localhost')
 
 INSTALLED_APPS = [
     'rest_framework',
-
     'project.apps.ProjectConfig',
     'api.apps.ApiConfig',
     'users.apps.UsersConfig',
@@ -80,11 +81,9 @@ DATABASES_SETTINGS = {
         "PASSWORD": env("POSTGRES_PASSWORD", ""),
         "HOST": env("SQL_HOST", "localhost"),
         "PORT": env("SQL_PORT", "5432"),
-    }
+    },
 }
-DATABASES = {
-    'default': DATABASES_SETTINGS[env.str('SQL_ENGINE', 'default')]
-}
+DATABASES = {'default': DATABASES_SETTINGS[env.str('SQL_ENGINE', 'sqlite')]}
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -112,7 +111,12 @@ USE_L10N = True
 
 USE_TZ = True
 
-STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+STATIC_URL = '/static_files/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static_files')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
