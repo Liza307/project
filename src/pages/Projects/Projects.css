@@ -1,0 +1,23 @@
+.card__data {
+  display: flex;
+  flex-direction: column;
+  margin-top: -12px;
+}
+
+.card__projects {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card__more {
+  opacity: 0.45;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-wrap: nowrap;
+}
+
+.anticon svg {
+  width: 20px;
+  height: 20px;
+}

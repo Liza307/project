@@ -1,0 +1,61 @@
+.header__buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding-right: 24px;
+}
+
+.ant-statistic {
+  display: flex;
+  margin: 22px 24px;
+}
+
+.ant-statistic .ant-statistic-title {
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 18px;
+  color: #000;
+}
+
+.ant-statistic-title {
+  margin-bottom: 0;
+}
+
+.ant-statistic-content {
+  margin-left: 12px;
+  align-items: center;
+  display: flex;
+}
+
+.ant-statistic-content-value {
+  color: #1890ff;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  background-color: #e6f7ff;
+  padding: 0 20px;
+  border-radius: 15px;
+}
+
+.ant-layout-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.ant-btn {
+  margin: auto 0;
+}
+
+.filters {
+  background-color: #fff;
+  margin: 24px 16px 0 16px;
+  padding: 24px 24px 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.buttons {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}

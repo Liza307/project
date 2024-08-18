@@ -1,0 +1,12 @@
+.sidebar {
+  width: 208px;
+  box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.15);
+
+}
+
+.sidebar__container {
+  min-height: calc(100vh - 52px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}

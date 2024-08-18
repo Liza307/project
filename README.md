@@ -1,6 +1,2 @@
-# gazprom_project
-hr application
-
-Ввод тестовых данных
-
-`python manage.py insert_test_data`
+# Хакатон Яндекс Газпром
+[Ссылка на проект](https://dev--delightful-bublanina-904784.netlify.app/projects)
